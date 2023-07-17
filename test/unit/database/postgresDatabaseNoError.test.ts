@@ -21,7 +21,13 @@ jest.mock("pg", () => {
 });
 
 test("lintQuery is null when there are no errors", async () => {
-  const db = new PostgresDatabase("localhost", "user", "password", 5432);
+  const db = new PostgresDatabase(
+    "localhost",
+    "user",
+    "password",
+    "postgres",
+    5432
+  );
   const sql = "SELECT some_column FROM some_table WHERE id = 1";
 
   expect(await db.lintQuery(sql)).toBeNull();
