@@ -21,6 +21,7 @@ export default class PostgresDatabase implements IDatabase {
   }
 
   public async lintQuery(query: string): Promise<sqlError | null> {
+    console.log(this.pool);
     return new Promise<sqlError | null>((resolve) => {
       this.pool.query(`EXPLAIN ${query}`, (err) => {
         if (err) {

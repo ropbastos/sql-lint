@@ -12,6 +12,7 @@ class PostgresDatabase {
         });
     }
     async lintQuery(query) {
+        console.log(this.pool);
         return new Promise((resolve) => {
             this.pool.query(`EXPLAIN ${query}`, (err) => {
                 if (err) {
