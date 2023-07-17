@@ -4,20 +4,22 @@ import * as program from "commander";
 import * as fs from "fs";
 import * as process from "process";
 
+import { version } from "../package.json";
 import { CheckerRunner } from "./checker/checkerRunner";
-import { file, getConfiguration, findConfiguration } from "./config";
+import { file, findConfiguration, getConfiguration } from "./config";
+import databaseFactory from "./database/databaseFactory";
 import { findByExtension } from "./file";
 import { FormatterFactory } from "./formatter/formatterFactory";
-import { getQueryFromFile, getQueryFromLine } from "./reader/reader";
 import { Printer } from "./printer";
 import { Query } from "./reader/query";
-import { version } from "../package.json";
-import databaseFactory from "./database/databaseFactory";
+import { getQueryFromFile, getQueryFromLine } from "./reader/reader";
 
 (async () => {
   program
     .version(version)
-    .description("Lint sql files and stdin for errors, oddities, and bad practices.")
+    .description(
+      "Lint sql files and stdin for errors, oddities, and bad practices."
+    )
     .option("--fix [string]", "The .sql string to fix (experimental and alpha)")
     .option(
       "-d, --driver <string>",
@@ -34,12 +36,16 @@ import databaseFactory from "./database/databaseFactory";
       "The format of the output, can be one of ['simple', 'json']",
       "simple"
     )
-    .option("--host <string>", "The host for the database connection")
-    .option("--user <string>", "The user for the database connection")
-    .option("--password <string>", "The password for the database connection")
-    .option("--port <string>", "The port for the database connection")
+    .option("--host <string>", "The host for the connection")
+    .option("--user <string>", "The user for the connection")
+    .option("--password <string>", "The password for the connection")
+    .option("--database <string>", "The database for the connection")
+    .option("--port <string>", "The port for the connection")
     .option("--config <string>", "The path to the configuration file")
-    .option("--ignore-errors <string...>", "The errors to ignore (comma separated)")
+    .option(
+      "--ignore-errors <string...>",
+      "The errors to ignore (comma separated)"
+    )
     .parse(process.argv);
 
   let queries: Query[] = [];
@@ -48,7 +54,7 @@ import databaseFactory from "./database/databaseFactory";
   const formatterFactory = new FormatterFactory();
   const format = formatterFactory.build(program.format);
   const printer: Printer = new Printer(program.verbose, format);
-  const configuration = (program.config)
+  const configuration = program.config
     ? getConfiguration(program.config)
     : findConfiguration();
   const runner = new CheckerRunner();
@@ -78,13 +84,12 @@ import databaseFactory from "./database/databaseFactory";
   // Read from stdin if no args are supplied
   if (!programFile) {
     try {
-        queries = getQueryFromLine(fs.readFileSync(0).toString());
-        prefix = "stdin";
+      queries = getQueryFromLine(fs.readFileSync(0).toString());
+      prefix = "stdin";
     } catch (error) {
-        printer.warnAboutNoStdinStream();
+      printer.warnAboutNoStdinStream();
     }
   }
-
 
   let omittedErrors: string[] = [];
   if (configuration !== null && "ignore-errors" in configuration) {
@@ -92,7 +97,7 @@ import databaseFactory from "./database/databaseFactory";
   }
 
   if (program.ignoreErrors) {
-      omittedErrors = program.ignoreErrors.split(',')
+    omittedErrors = program.ignoreErrors.split(",");
   }
 
   let db: any;
@@ -113,6 +118,7 @@ import databaseFactory from "./database/databaseFactory";
       program.host || configuration?.host || "localhost",
       program.user || configuration?.user || "root", // bad practice but unfortunately common, make it easier for the user
       program.password || configuration?.password,
+      program.database || configuration?.database,
       program.port || configuration?.port || undefined // let mysql2 or pg figure out the default port
     );
   }

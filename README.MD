@@ -9,7 +9,6 @@ If you worry about forgetting `WHERE`s on a `DELETE` or borking your data with u
 
 ![Imgur](https://i.imgur.com/nqi1MnT.gif)
 
-
 ## Installation
 
 ```
@@ -63,20 +62,61 @@ sqlLint({ sql: 'SELECT my_column FROM my_table' }).then(errors => {
 })
 ```
 
-## Supported Editors
+### Parameters
+
+sql-lint accepts an object using the following interface as its only argument
+
+```
+{
+  sql: string
+  host?: string
+  user?: string
+  port?: number
+  driver?: string
+  prefix?: string
+  password?: string
+  database?: string
+  verbosity?: number
+}
+```
+
+### Notes on some of the parameters
+
+`sql`: can have multiple queries separated by `;`
+
+`host`: if host is not provided `sql-lint` will only perform checks that do not require a connection
+
+`driver`: defaults to mysql
+
+`port`: if port is not provided it will use the default port for the driver you are using
+
+### Output
+
+sql-lint returns an `array` of objects with the following shape
+
+```
+{
+  line: number
+  error: string
+  source: string
+  additionalInformation: string
+}
+```
+
+## Editor Integration
 
 If your editor supports external tools, then it supports `sql-lint`.
 Below is the list that have direct support for `sql-lint` either through plugins or configuration.
 
-| Editor      | Plugin |
-| ----------- | ----------- |
-| Neovim      | [Ale](https://github.com/dense-analysis/ale/)       |
-| Vim         | [Ale](https://github.com/dense-analysis/ale/)        |
-| VS Code     | [Inline SQL](https://marketplace.visualstudio.com/items?itemName=qufiwefefwoyn.inline-sql-syntax)        |
+| Editor  | Plugin                                                                                            |
+| ------- | ------------------------------------------------------------------------------------------------- |
+| Neovim  | [Ale](https://github.com/dense-analysis/ale/)                                                     |
+| Vim     | [Ale](https://github.com/dense-analysis/ale/)                                                     |
+| VS Code | [Inline SQL](https://marketplace.visualstudio.com/items?itemName=qufiwefefwoyn.inline-sql-syntax) |
 
 ## Checks
 
-A quick rundown of the checks is below but you should [read the documentation](https://sql-lint.readthedocs.io/en/latest/files/checks.html) 
+A quick rundown of the checks is below but you should [read the documentation](https://sql-lint.readthedocs.io/en/latest/files/checks.html)
 for an exhaustive list.
 
 `sql-lint` comes with its own suite of checks. It
@@ -93,6 +133,7 @@ Shown when a query has an unbalanced amount of parentheses.
 ```
 test/test-files//test.sql:16 [sql-lint: unmatched-parentheses] Unmatched parentheses.
 ```
+
 </details>
 
 <details>
@@ -103,6 +144,7 @@ Shown when a `DELETE` statement is missing a `WHERE` clause.
 ```
 test/test-files/test.sql:20 [sql-lint: missing-where] DELETE statement missing WHERE clause.
 ```
+
 </details>
 
 <details>
@@ -113,6 +155,7 @@ Shown when an invalid option is given to the `DROP` statement.
 ```
 test/test-files/test.sql:22 [sql-lint: invalid-drop-option] Option 'thing' is not a valid option, must be one of '["database","event","function","index","logfile","procedure","schema","server","table","view","tablespace","trigger"]'.
 ```
+
 </details>
 
 <details>
@@ -123,6 +166,7 @@ Shown when an invalid option is given to the `CREATE` statement.
 ```
 :24 [sql-lint: invalid-create-option] Option 'test' is not a valid option, must be one of '["algorithm","database","definer","event","function","index","or","procedure","server","table","tablespace","temporary","trigger","user","unique","view"]'.
 ```
+
 </details>
 
 <details>
@@ -133,6 +177,7 @@ Shown when an invalid option is given to the `TRUNCATE` statement.
 ```
 test/test-files/test.sql:26 [sql-lint: invalid-truncate-option] Option 'something' is not a valid option, must be one of '["table"]'.
 ```
+
 </details>
 
 <details>
@@ -143,21 +188,23 @@ Shown when an invalid option is given to the `ALTER` statement.
 ```
 test/test-files/test.sql:28 [sql-lint: invalid-alter-option] Option 'mlady' is not a valid option, must be one of '["column","online","offline","ignore","database","event","function","procedure","server","table","tablespace","view"]'.
 ```
+
 </details>
 
 <details>
 
   <summary>odd-code-point</summary>
 
-Shown when there are unsupported/unusual* code points in your code.
+Shown when there are unsupported/unusual\* code points in your code.
 
-*<small>This check came about whilst working Microsoft Excel. Microsoft likes to
+\*<small>This check came about whilst working Microsoft Excel. Microsoft likes to
 add a lot of zany characters which can subtly break your data without you
 realising.</small>
 
 ```
 test/test-files//test.sql:30 [sql-lint: odd-code-point] Unexpected code point.
 ```
+
 </details>
 
 <details>
@@ -171,6 +218,7 @@ Shown when you specify something other than a number to the `LIMIT` statement.
 ```
 test/test-files//test.sql:32 [sql-lint: invalid-limit-quantifier] Argument 'test' is not a valid quantifier for LIMIT clause.
 ```
+
 </details>
 
 <details>
@@ -184,6 +232,7 @@ Shown when the string `sp_` or `tbl_` is present in the query.
 ```
 test/test-files/test.sql:34 [sql-lint: hungarian-notation] Hungarian notation present in query
 ```
+
 </details>
 
 <details>
@@ -196,6 +245,7 @@ Shown when a query has trailing whitespace.
 ```
 test/test-files/test.sql:34 [sql-lint: trailing-whitespace] Trailing whitespace
 ```
+
 </details>
 
 ## Documentation
